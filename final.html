@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CSJMU Student Portal - Final Version</title>
+    <meta name="viewport" content="width=1200">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        html, body { margin: 0; padding: 0; background: #f2f2f2; font-family: 'Roboto', sans-serif; color: #333; }
+        .header { position: fixed; top: 0; left: 0; right: 0; background: #ffffff; padding: 10px 30px; font-size: 14px; color: #2c7be5; z-index: 1000; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .user-profile { display: flex; align-items: center; color: #555; font-weight: 500; }
+        .page { width: 1200px; margin: 0 auto; min-height: calc(100vh - 60px); display: flex; flex-direction: column; align-items: center; padding-top: 80px; padding-bottom: 40px; position: relative; }
+
+        .login-box { 
+            width: 380px; background: #ffffff; padding: 40px 30px; 
+            border-top: 3px solid #2c7be5; box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
+            margin-top: 50px; text-align: center; border-radius: 4px;
+        }
+        .login-box img { width: 120px; height: auto; margin-bottom: 10px; display: block; margin-left: auto; margin-right: auto; }
+        .login-box h2 { font-size: 20px; font-weight: 500; margin: 0 0 25px 0; color: #444; }
+        .login-box h3 { font-size: 18px; font-weight: 500; text-align: left; margin-bottom: 15px; color: #333; }
+        .form-group { text-align: left; margin-bottom: 20px; position: relative; }
+        .form-group label { display: block; font-size: 13px; color: #666; margin-bottom: 8px; }
+        .form-group input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; font-size: 14px; }
+        
+        /* Smart Password Toggle Style */
+        .pass-toggle { 
+            position: absolute; right: 10px; top: 35px; background: none; 
+            border: none; color: #2c7be5; cursor: pointer; font-size: 12px; 
+            font-weight: 500; display: none; /* Hidden by default */
+        }
+
+        .login-btn { width: 100px; padding: 10px; background: #337ab7; border: 1px solid #2e6da4; color: #fff; cursor: pointer; border-radius: 4px; font-size: 14px; margin-bottom: 20px; }
+        .login-footer-btns { display: flex; justify-content: center; gap: 10px; margin-top: 10px; }
+        .btn-green { background: #5cb85c; color: white; border: none; padding: 8px 15px; border-radius: 4px; font-size: 13px; cursor: pointer; }
+        .btn-link { background: none; color: #337ab7; border: none; font-size: 13px; cursor: pointer; }
+
+        .success-box, #submissionPopup { width: 360px; background: #ffffff; padding: 25px; border-top: 4px solid #2c7be5; box-shadow: 0 0 6px rgba(0,0,0,0.12); margin-top: 50px; text-align: center; }
+        #submissionPopup { display: none; border-top-color: #28a745; }
+        #loader { display: none; border: 6px solid #f3f3f3; border-top: 6px solid #2c7be5; border-radius: 50%; width: 60px; height: 60px; animation: spin 1s linear infinite; margin-top: 100px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        #courseSection { display: none; width: 1000px; background: #fff; padding: 30px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        .info-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 12px; }
+        .info-table td { border: 1px solid #e0e0e0; padding: 10px; background: #fafafa; }
+        .course-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        .course-table th { text-align: left; background: #f8f9fa; padding: 12px; border: 1px solid #e0e0e0; font-size: 13px; }
+        .course-table td { border: 1px solid #e0e0e0; padding: 15px; vertical-align: top; font-size: 13px; }
+
+        #receiptPage { display: none; width: 1000px; background: #fff; padding: 40px; box-shadow: 0 0 15px rgba(0,0,0,0.1); margin-top: 20px; }
+        .receipt-header { display: flex; align-items: center; margin-bottom: 30px; border-bottom: 1px solid #eee; padding-bottom: 20px; }
+        .receipt-table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 13px; }
+        .receipt-table th, .receipt-table td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        
+        .samarth-footer { width: 1000px; margin-top: 20px; font-size: 12px; color: #2c7be5; text-align: left; }
+        .login-footer-tag { width: 100%; text-align: left; margin-top: 20px; font-size: 12px; color: #2c7be5; position: relative; left: -310px; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div>Chhatrapati Shahu Ji Maharaj University Kanpur</div>
+    <div class="user-profile" id="headerUser" style="display:none;">
+        <span style="margin-right:8px;">👤</span> <span id="headerEnrollDisplay"></span>
+    </div>
+</div>
+
+<div class="page">
+    <div id="loginWrapper">
+        <div class="login-box" id="loginBox">
+            <img src="https://i.ibb.co/whjMd9LH/1350.jpg" alt="CSJMU Logo">
+            <h2>Student Portal</h2>
+            <h3>Sign In</h3>
+            <div class="form-group">
+                <label>Username</label>
+                <input type="text" id="enroll" placeholder="Enrolment Number">
+                <small style="color: #666; font-size: 11px; margin-top: 5px; display: block;">Username cannot be blank.</small>
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="password" placeholder="Password" oninput="checkPassInput()">
+                <button type="button" class="pass-toggle" id="passToggleBtn" onclick="togglePassword()">Show</button>
+            </div>
+            <button class="login-btn" onclick="login()">Login</button>
+            <div class="login-footer-btns">
+                <button class="btn-green">New Registration</button>
+                <button class="btn-link">Reset Password</button>
+            </div>
+        </div>
+        <div class="login-footer-tag">© Samarth eGov</div>
+    </div>
+
+    <div class="success-box" id="successBox" style="display:none;">
+        <div style="font-size:40px; color:#28a745;">✓</div>
+        <h4>Login Successful</h4>
+        <p style="font-size:13px; color:#555;">You have successfully logged into CSJMU course selection portal.</p>
+        <button class="login-btn" onclick="showSelection()" style="background:#28a745; width: 150px; border: none;">Continue</button>
+    </div>
+
+    <div id="courseSection">
+        <h3 style="border-bottom: 1px solid #eee; padding-bottom: 15px; margin-bottom: 20px;">Course Selection Section</h3>
+        <table class="info-table">
+            <tr>
+                <td>Enrolment Number:</td><td style="font-weight: 500;" id="infoEnroll"></td>
+                <td>Programme:</td><td style="font-weight: 500;">MSCCH : Master of Science(CHEMISTRY)</td>
+                <td>Session:</td><td style="font-weight: 500;">2026-JANUARY</td>
+                <td>Refrence Number:</td><td style="font-weight: 500;">1117108</td>
+                <td>Category:</td><td style="font-weight: 500;">SC</td>
+            </tr>
+            <tr><td colspan="10" style="background:#fff;">Discipline opted details : <b>1 MAJOR 1 MINOR</b></td></tr>
+        </table>
+        <div style="font-weight:500; margin-bottom:10px;">Courses Selection for SEMESTER 4</div>
+        <table class="course-table">
+            <thead>
+                <tr><th style="width:50px;">S.No</th><th style="width:150px;">Option Type</th><th>Course Code : Course Name (Credit)</th></tr>
+            </thead>
+            <tbody>
+                <tr><td>1</td><td>MAJOR</td><td>B021011P : PRACTICAL (4.00)</td></tr>
+                <tr><td>2</td><td>MAJOR</td><td>B021012R : RESEARCH PROJECT (8.00)</td></tr>
+                <tr>
+                    <td>3</td><td>MSCCH_A23_SEM4_ELECTIVE_GROUP3</td>
+                    <td>
+                        <div style="font-weight: 500; margin-bottom: 15px;">You need to select 16 credit. You have selected <span id="selectedCredits">0</span> credit.</div>
+                        <div style="display: flex; flex-direction: column; gap: 10px;">
+                            <label><input type="checkbox" class="course-cb" value="B021001T : ORGANIC SYNTHESIS"> B021001T : ORGANIC SYNTHESIS (4.00)</label>
+                            <label><input type="checkbox" class="course-cb" value="B021002T : HETEROCYCLIC CHEMISTRY"> B021002T : HETEROCYCLIC CHEMISTRY (4.00)</label>
+                            <label><input type="checkbox" class="course-cb" value="B021003T : CHEMISTRY OF NATURAL PRODUCTS"> B021003T : CHEMISTRY OF NATURAL PRODUCTS (4.00)</label>
+                            <label><input type="checkbox" class="course-cb" value="B021008T : BIOINORGANIC AND SUPRAMOLECULAR CHEMISTRY"> B021008T : BIOINORGANIC AND SUPRAMOLECULAR CHEMISTRY (4.00)</label>
+                            <label><input type="checkbox" class="course-cb" value="B021004T : MEDICINAL CHEMISTRY"> B021004T : MEDICINAL CHEMISTRY (4.00)</label>
+                            <label><input type="checkbox" class="course-cb" value="B021005T : PLOYMERS"> B021005T : PLOYMERS (4.00)</label>
+                            <label><input type="checkbox" class="course-cb" value="B021006T : NUCLEAR AND RADIO CHEMISTRY"> B021006T : NUCLEAR AND RADIO CHEMISTRY (4.00)</label>
+                            <label><input type="checkbox" class="course-cb" value="B021007T : COMPUTATIONAL CHEMISTRY"> B021007T : COMPUTATIONAL CHEMISTRY (4.00)</label>
+                            <label><input type="checkbox" class="course-cb" value="B021009T : INDUSTRIAL CHEMISTRY"> B021009T : INDUSTRIAL CHEMISTRY (4.00)</label>
+                            <label><input type="checkbox" class="course-cb" value="B021010T : GREEN CHEMISTRY"> B021010T : GREEN CHEMISTRY (4.00)</label>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <div style="text-align:center; margin-top:30px;"><button onclick="submit()" style="background:#4a90e2; padding:10px 60px; color: white; border: none; cursor: pointer; border-radius: 4px;">Submit</button></div>
+        <div class="samarth-footer">© Samarth eGov</div>
+    </div>
+
+    <div id="loader"></div>
+
+    <div id="submissionPopup">
+        <div style="font-size:40px; color:#28a745;">✓</div>
+        <h3>Submitted!</h3>
+        <p style="font-size:13px; color:#555;">Your courses has been submitted successfully.</p>
+        <button onclick="showReceipt()" style="background:#28a745; padding: 10px; color: white; border: none; width: 100%; cursor: pointer;">Continue</button>
+    </div>
+
+    <div id="receiptPage">
+        <div class="receipt-header">
+            <img src="https://i.ibb.co/whjMd9LH/1350.jpg" width="80" style="margin-right: 20px;">
+            <div style="flex-grow: 1; text-align: center;"><h2>Chhatrapati Shahu Ji Maharaj University Kanpur</h2><p>Course Selection JANUARY-2026</p></div>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px;">
+            <div style="font-weight: 500;">Student Details</div><div id="qrcode"></div>
+        </div>
+        <table class="receipt-table">
+            <tr>
+                <th>Enrolment Number</th><td id="rEnroll"></td><th>Name</th><td>SANDEEP KUMAR</td><th>Programme</th><td>MSCCH : Master of Science(CHEMISTRY)</td>
+            </tr>
+            <tr>
+                <th>Session</th><td>JANUARY-2026</td><th>Reference Number</th><td>1117108</td><th>Category</th><td>SC</td>
+            </tr>
+        </table>
+        <p style="margin-top:20px;"><strong>Your Course Selections</strong></p>
+        <table class="receipt-table">
+            <thead><tr><th>S.No</th><th>Course Code</th><th>Name of Course</th><th>Credits</th><th>Term</th></tr></thead>
+            <tbody id="rRows"></tbody>
+            <tfoot><tr><td colspan="3" style="text-align:right"><strong>Total Credit</strong></td><td><strong>28</strong></td><td></td></tr></tfoot>
+        </table>
+        <div style="margin-top:30px; border: 1px solid #ddd; padding: 15px; font-size: 13px;"><strong>Declaration:</strong> Course selection submitted on <span id="rDate"></span></div>
+        <div class="samarth-footer">© Samarth eGov</div>
+    </div>
+</div>
+
+<script>
+    let currentEnroll = "";
+
+    // Show button only when typing
+    function checkPassInput() {
+        const passInput = document.getElementById("password");
+        const btn = document.getElementById("passToggleBtn");
+        btn.style.display = passInput.value.length > 0 ? "block" : "none";
+    }
+
+    function togglePassword() {
+        const passInput = document.getElementById("password");
+        const btn = document.getElementById("passToggleBtn");
+        if (passInput.type === "password") {
+            passInput.type = "text";
+            btn.innerText = "Hide";
+        } else {
+            passInput.type = "password";
+            btn.innerText = "Show";
+        }
+    }
+
+    function login() {
+        currentEnroll = document.getElementById("enroll").value;
+        let pass = document.getElementById("password").value;
+        if(currentEnroll === "CSJMA24000127640" && pass === "sandeep@123") {
+            document.getElementById("headerEnrollDisplay").innerText = currentEnroll;
+            document.getElementById("infoEnroll").innerText = currentEnroll;
+            document.getElementById("rEnroll").innerText = currentEnroll;
+            document.getElementById("loginWrapper").style.display="none";
+            document.getElementById("successBox").style.display="block";
+        } else { alert("Login failed! Enrollment ya Password check karein."); }
+    }
+    function showSelection() {
+        document.getElementById("successBox").style.display="none";
+        document.getElementById("courseSection").style.display="block";
+        document.getElementById("headerUser").style.display="flex";
+    }
+    const cbs = document.querySelectorAll('.course-cb');
+    cbs.forEach(cb => {
+        cb.onchange = () => {
+            let count = document.querySelectorAll('.course-cb:checked').length;
+            document.getElementById("selectedCredits").innerText = count * 4;
+            cbs.forEach(x => { if(!x.checked) x.disabled = (count >= 4); });
+        }
+    });
+    function submit() {
+        if(document.querySelectorAll('.course-cb:checked').length < 4) return alert("Select 4 elective courses.");
+        document.getElementById("courseSection").style.display="none";
+        document.getElementById("loader").style.display="block";
+        setTimeout(() => {
+            document.getElementById("loader").style.display="none";
+            document.getElementById("submissionPopup").style.display="block";
+        }, 2000);
+    }
+    function showReceipt() {
+        document.getElementById("submissionPopup").style.display="none";
+        document.getElementById("receiptPage").style.display="block";
+        document.getElementById("rDate").innerText = new Date().toLocaleString();
+        let rows = document.getElementById("rRows");
+        let tableHTML = "";
+        let selected = document.querySelectorAll('.course-cb:checked');
+        let qrData = `SANDEEP KUMAR | ${currentEnroll} | 2026\n`;
+        selected.forEach((c, i) => {
+            let val = c.value.split(" : ");
+            tableHTML += `<tr><td>${i+1}</td><td>${val[0]}</td><td>${val[1]}</td><td>4.00</td><td>4 SEMESTER</td></tr>`;
+            qrData += `- ${val[1]}\n`;
+        });
+        tableHTML += `<tr><td>5</td><td>B021011P</td><td>PRACTICAL</td><td>4.00</td><td>4 SEMESTER</td></tr>`;
+        tableHTML += `<tr><td>6</td><td>B021012R</td><td>RESEARCH PROJECT</td><td>8.00</td><td>4 SEMESTER</td></tr>`;
+        rows.innerHTML = tableHTML;
+        document.getElementById("qrcode").innerHTML = "";
+        new QRCode(document.getElementById("qrcode"), { text: qrData, width: 70, height: 70 });
+    }
+</script>
+</body>
+</html>
